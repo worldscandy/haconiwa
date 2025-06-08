@@ -76,6 +76,119 @@ haconiwa company kill <company-name>
 - Python対応: 3.8+
 - 開発ステータス: Alpha開発中
 
+## 他プロジェクトでの使用方法
+
+### グローバルインストール
+```bash
+# PyPIからグローバルインストール（推奨）
+pip install --user haconiwa
+
+# または開発版を使用
+pip install --user haconiwa==0.2.2
+```
+
+グローバルインストール後は、任意のディレクトリで`haconiwa`コマンドが使用可能。
+
+### 基本的な使用パターン
+```bash
+# 任意のリポジトリディレクトリに移動
+cd /path/to/your/repository
+
+# worktreeディレクトリで多Agent環境を作成
+haconiwa company multiagent \
+  --name project-name \
+  --base-path ./worktree \
+  --org01-name "Frontend" --task01 "UI Development" \
+  --org02-name "Backend" --task02 "API Development" \
+  --org03-name "Testing" --task03 "QA Testing" \
+  --org04-name "DevOps" --task04 "CI/CD" \
+  --no-attach
+
+# 作業開始
+haconiwa company attach project-name
+
+# 作業終了後のクリーンアップ
+haconiwa company kill project-name --clean-dirs --base-path ./worktree --force
+```
+
+### セットアップスクリプト（setup-haconiwa.sh）
+プロジェクトで効率的に使用するための自動化スクリプト:
+
+```bash
+#!/bin/bash
+# setup-haconiwa.sh - プロジェクト用Haconiwa環境セットアップスクリプト
+
+PROJECT_NAME=${1:-$(basename $(pwd))}
+BASE_PATH=${2:-"./worktree"}
+
+echo "🚀 Setting up Haconiwa environment for: $PROJECT_NAME"
+echo "📁 Base path: $BASE_PATH"
+
+# 既存のcompanyをチェック
+if haconiwa company list | grep -q "$PROJECT_NAME"; then
+    echo "⚠️  Company '$PROJECT_NAME' already exists"
+    read -p "Kill existing company and recreate? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        haconiwa company kill "$PROJECT_NAME" --clean-dirs --base-path "$BASE_PATH" --force
+    else
+        echo "Attaching to existing company..."
+        haconiwa company attach "$PROJECT_NAME"
+        exit 0
+    fi
+fi
+
+# 新しいcompanyを作成
+haconiwa company multiagent \
+    --name "$PROJECT_NAME" \
+    --base-path "$BASE_PATH" \
+    --org01-name "Frontend" --task01 "UI/UX Development" \
+    --org02-name "Backend" --task02 "API & Logic" \
+    --org03-name "Testing" --task03 "QA & Testing" \
+    --org04-name "DevOps" --task04 "Build & Deploy" \
+    --no-attach
+
+echo "✅ Haconiwa environment created successfully!"
+echo "🔗 To attach: haconiwa company attach $PROJECT_NAME"
+echo "💀 To cleanup: haconiwa company kill $PROJECT_NAME --clean-dirs --base-path $BASE_PATH --force"
+```
+
+**使用方法:**
+```bash
+# スクリプトを実行可能にする
+chmod +x setup-haconiwa.sh
+
+# プロジェクトディレクトリで実行
+./setup-haconiwa.sh my-project ./worktree
+```
+
+### プロジェクト別カスタマイズ例
+```bash
+# React/Next.jsプロジェクト
+haconiwa company multiagent \
+    --name react-app \
+    --org01-name "Components" --task01 "UI Components" \
+    --org02-name "Pages" --task02 "Page Development" \
+    --org03-name "API" --task03 "API Integration" \
+    --org04-name "Styling" --task04 "CSS/Tailwind"
+
+# Python/Django プロジェクト  
+haconiwa company multiagent \
+    --name django-api \
+    --org01-name "Models" --task01 "Database Design" \
+    --org02-name "Views" --task02 "API Endpoints" \
+    --org03-name "Tests" --task03 "Unit/Integration Tests" \
+    --org04-name "Deploy" --task04 "Docker/K8s"
+```
+
+### マルチプロジェクト管理
+```bash
+# 複数プロジェクトの同時管理
+haconiwa company list                    # 全プロジェクト確認
+haconiwa company attach web-frontend     # 特定プロジェクトにアタッチ
+haconiwa company kill old-project --force # 不要なプロジェクト削除
+```
+
 ### 既知の問題
 
 #### ~~PyPI パッケージの依存関係不足~~ (v0.2.2で修正済み)

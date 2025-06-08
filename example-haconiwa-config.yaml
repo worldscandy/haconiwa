@@ -1,0 +1,27 @@
+# .haconiwa/config.yaml - プロジェクト固有設定例
+project:
+  name: "my-project"
+  base_path: "./worktree"
+  
+organizations:
+  - id: "org-01"
+    name: "Frontend Team"
+    task: "React/Vue Development"
+    workspace: "frontend-desk"
+  - id: "org-02" 
+    name: "Backend Team"
+    task: "API/Database Development"
+    workspace: "backend-desk"
+  - id: "org-03"
+    name: "Testing Team"
+    task: "QA & Testing"
+    workspace: "testing-desk"
+  - id: "org-04"
+    name: "DevOps Team"
+    task: "CI/CD & Infrastructure"
+    workspace: "devops-desk"
+
+settings:
+  auto_attach: false
+  auto_cleanup: true
+  tmux_layout: "tiled"
